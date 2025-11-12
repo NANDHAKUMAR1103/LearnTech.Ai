@@ -1,0 +1,191 @@
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: #0f0c29;
+        background: linear-gradient(to right, #24243e, #302b63, #0f0c29);
+    }
+
+    .article-container {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 2rem;
+        position: relative;
+    }
+
+    .page-title {
+        color: #fff;
+        text-align: center;
+        font-size: 3em;
+        margin-bottom: 2rem;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        position: relative;
+        text-shadow: 0 0 10px rgba(255,255,255,0.3);
+    }
+
+    .page-title::after {
+        content: '';
+        display: block;
+        width: 100px;
+        height: 3px;
+        background: linear-gradient(90deg, #ff6b6b, #4ecdc4);
+        margin: 10px auto;
+    }
+
+    .articles-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+        padding: 1rem;
+    }
+
+    .article {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        padding: 1.5rem;
+        transition: all 0.3s ease;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .article::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+        transform: translateX(-100%);
+        transition: 0.5s;
+    }
+
+    .article:hover::before {
+        transform: translateX(100%);
+    }
+
+    .article:hover {
+        transform: translateY(-5px) scale(1.02);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        background: rgba(255, 255, 255, 0.1);
+    }
+
+    .article a {
+        color: #fff;
+        text-decoration: none;
+        font-size: 1.1em;
+        font-weight: 500;
+        display: block;
+        margin-bottom: 1rem;
+        transition: color 0.3s ease;
+    }
+
+    .article a:hover {
+        color: #4ecdc4;
+    }
+
+    .article p {
+        color: #a8a8a8;
+        font-size: 0.9em;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .loading {
+        text-align: center;
+        color: #fff;
+        font-size: 1.2em;
+        padding: 2rem;
+        background: rgba(255,255,255,0.05);
+        border-radius: 15px;
+        backdrop-filter: blur(10px);
+    }
+
+    .error {
+        color: #ff6b6b;
+        text-align: center;
+        padding: 1rem;
+        background: rgba(255,0,0,0.1);
+        border-radius: 10px;
+        margin: 1rem 0;
+    }
+
+    @keyframes shimmer {
+        0% { background-position: -1000px 0; }
+        100% { background-position: 1000px 0; }
+    }
+</style>
+
+<div class="article-container">
+    <h1 class="page-title">
+        <i class="fas fa-newspaper"></i>
+        Latest Tech Articles
+    </h1>
+
+    <div id="articles" class="articles-grid loading">
+        <i class="fas fa-spinner fa-spin"></i>
+        Loading the latest articles...
+    </div>
+</div>
+
+<!-- Add FontAwesome for icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+<script>
+    async function loadRSSFeed() {
+        const rssFeedUrl = "https://feeds.arstechnica.com/arstechnica/index";
+        const proxy = "https://api.allorigins.win/get?url=";
+
+        try {
+            const response = await fetch(proxy + encodeURIComponent(rssFeedUrl));
+            if (!response.ok) throw new Error("Network response was not ok");
+
+            const json = await response.json();
+            const text = json.contents;
+            const xml = new window.DOMParser().parseFromString(text, "text/xml");
+
+            let items = xml.querySelectorAll("item");
+            let output = "";
+
+            items.forEach((el, index) => {
+                let title = el.querySelector("title").textContent;
+                let link = el.querySelector("link").textContent;
+                let date = new Date(el.querySelector("pubDate").textContent).toLocaleDateString();
+
+                output += `
+                    <div class="article" style="animation: fadeIn 0.5s ease-out ${index * 0.1}s forwards">
+                        <a href="${link}" target="_blank">
+                            <i class="fas fa-link"></i> ${title}
+                        </a>
+                        <p>
+                            <i class="far fa-clock"></i>
+                            <span>Published: ${date}</span>
+                        </p>
+                    </div>
+                `;
+            });
+
+            document.getElementById("articles").innerHTML = output;
+        } catch (error) {
+            document.getElementById("articles").innerHTML = `
+                <div class="error">
+                    <i class="fas fa-exclamation-circle"></i>
+                    Failed to load articles. Please try again later.
+                </div>
+            `;
+            console.error("Error fetching RSS:", error);
+        }
+    }
+
+    loadRSSFeed();
+</script>
+<script>
+    console.log("Article loaded!");
+</script>
+<script>window.$zoho=window.$zoho || {};$zoho.salesiq=$zoho.salesiq||{ready:function(){}}</script><script id="zsiqscript" src="https://salesiq.zohopublic.com/widget?wc=siq2157a4c97d60f3c3a08009982b8f744b9be8b801d6052eece59d3c315eaea360" defer></script>
